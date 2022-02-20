@@ -1,15 +1,15 @@
 """
-Blackjack 
+Blackjack
 by JL 2022
 """
-from random import shuffle
+import random
 
 suits = ('Hearts', 'Diamonds', 'Spades', 'Clubs')
 ranks = ('Two', 'Three', 'Four', 'Five', 'Six', 'Seven',
          'Eight', 'Nine', 'Ten', 'Jack', 'Queen', 'King', 'Ace')
-values = {'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5, 'Six': 6, 'Seven': 7,
-          'Eight': 8, 'Nine': 9, 'Ten': 10, 'Jack': 11, 'Queen': 12,
-          'King': 13, 'Ace': 14}
+values = {'Ace': 0, 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5, 'Six': 6,
+          'Seven': 7, 'Eight': 8, 'Nine': 9, 'Ten': 10, 'Jack': 10,
+          'Queen': 10, 'King': 10}
 
 
 class Card():
@@ -48,3 +48,14 @@ class Deck():
         pop one card from the deck
         '''
         return self.all_cards.pop()
+
+
+def main():
+    """
+    main function
+    """
+    pass
+
+
+if __name__ == "__main__":
+    main()
