@@ -62,17 +62,26 @@ class Decks():
         if cut card met and no cards on the table, join used and shuffle
         if cards on the table shufle used and pop from used
         '''
+        # cut card
         if len(self.fresh_cards) < self.cut_card:
+
             # if no cards on the table
             if len(self.fresh_cards)\
              + len(self.used_cards) == 52 * self.decks_number:
                 print('Cut card: shuffling the deck.')
                 self.fresh_cards.extend(self.used_cards)
                 self.shuffle()
+
             # some cards on the table
+            elif len(self.fresh_cards) > 0:
+                print('Cut card')
+
+            # no fresh cards
             elif len(self.fresh_cards) == 0:
                 random.shuffle(self.used_cards)
+                print('No new cards, shuffling returned, dealing from returned.')
                 return self.used_cards.pop()
+
         return self.fresh_cards.pop()
 
     def return_cards(self, cards):
@@ -105,8 +114,32 @@ class Player():
         min_bet - minimal bet
         return False when user wants to quit
         """
-        if self.account < min_bet:
-            return False
+        # no money
+        if self.account == 0:
+            while True:
+                inp = input('Game over!\n[Q] to quit:')
+                if inp in ['q', 'Q']:
+                    return False
+
+        # not enaught money
+        elif self.account <= min_bet:
+
+            # decision
+            while True:
+                inp = input(f'Not enaught money to bet ({self.account}$)\n'
+                            'Do you want to go all in? (y/n)')
+                
+                # go all in
+                if inp in ['y', 'Y']:
+                    self.bet_ammount = self.account
+                    self.account = 0
+                    break
+                
+                # end game
+                elif inp in ['n', 'N']:
+                    return False
+
+        # money ok
         else:
             value = 0
             while True:

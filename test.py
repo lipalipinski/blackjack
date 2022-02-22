@@ -214,7 +214,6 @@ class TestTable(unittest.TestCase):
         self.assertIsInstance(test_table.player_cards[0], blackjack.Card)
 
 
-
 class TestPlayer(unittest.TestCase):
     """blackjack.Player class"""
 
