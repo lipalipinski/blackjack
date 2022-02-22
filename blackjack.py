@@ -137,7 +137,10 @@ class Player():
                 
                 # end game
                 elif inp in ['n', 'N']:
-                    return False
+                    while True:
+                        inp = input('Game over!\n[Q] to quit:')
+                        if inp in ['q', 'Q']:
+                            return False
 
         # money ok
         else:
