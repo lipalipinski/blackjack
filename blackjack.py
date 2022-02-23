@@ -66,15 +66,16 @@ class Decks():
         if len(self.fresh_cards) < self.cut_card:
 
             # if no cards on the table
-            if len(self.fresh_cards)\
-             + len(self.used_cards) == 52 * self.decks_number:
+            if len(self.fresh_cards) + len(self.used_cards) == 52 * self.decks_number:
                 print('Cut card: shuffling the deck.')
                 self.fresh_cards.extend(self.used_cards)
+                self.used_cards = []
+                self.cut_card = random.randint(15, 25)
                 self.shuffle()
 
             # some cards on the table
             elif len(self.fresh_cards) > 0:
-                print('Cut card')
+                print('Cut card (dealing fresh)')
 
             # no fresh cards
             elif len(self.fresh_cards) == 0:
@@ -90,7 +91,7 @@ class Decks():
         """
         if isinstance(cards, list):
             self.used_cards.extend(cards)
-        else:
+        elif isinstance(cards, Card):
             self.used_cards.append(cards)
 
 
@@ -147,7 +148,7 @@ class Player():
             value = 0
             while True:
                 try:
-                    value = input(f'{self.name} type your bet value (bank: {self.account}$)')
+                    value = input(f'{self.name} type your bet value (bank: {self.account}$):')
                     if value == 'Q':
                         return False
                     value = int(value)
