@@ -122,20 +122,6 @@ class TestTable(unittest.TestCase):
         card_set = [blackjack.Card('H', '2'), blackjack.Card('H', 'J')]
         self.assertEqual(test_table.hand_value(card_set), 12)
 
-    def test_hand_value_no_aces_2(self):
-        """over 21"""
-        test_table = blackjack.Table(1)
-        card_set = [blackjack.Card('H', 'K'), blackjack.Card('H', 'J'),
-                    blackjack.Card('H', '2')]
-        self.assertFalse(test_table.hand_value(card_set))
-
-    def test_hand_value_no_aces_3(self):
-        """21"""
-        test_table = blackjack.Table(1)
-        card_set = [blackjack.Card('H', 'K'), blackjack.Card('H', '6'),
-                    blackjack.Card('H', '5')]
-        self.assertTrue(test_table.hand_value(card_set))
-
     def test_hand_value_with_aces_1(self):
         """under 21"""
         test_table = blackjack.Table(1)
@@ -153,7 +139,7 @@ class TestTable(unittest.TestCase):
         """10 + ace == 21"""
         test_table = blackjack.Table(1)
         card_set = [blackjack.Card('H', '10'), blackjack.Card('H', 'A')]
-        self.assertTrue(test_table.hand_value(card_set))
+        self.assertEqual(test_table.hand_value(card_set), 21)
 
     def test_hand_value_with_aces_4(self):
         """two aces"""
@@ -175,12 +161,6 @@ class TestTable(unittest.TestCase):
         self.assertEqual(test_table.hand_value(card_set), 17)
 
     # dealers move
-    def test_dealers_move_1(self):
-        """dealer's blackjack"""
-        test_table = blackjack.Table(1)
-        test_table.dealers_cards = [blackjack.Card('H', 'K'),
-                                    blackjack.Card('H', 'A')]
-        self.assertTrue(test_table.dealers_move())
 
     def test_dealers_move_2(self):
         """dealer busts"""
@@ -189,23 +169,6 @@ class TestTable(unittest.TestCase):
                                     blackjack.Card('H', '8'),
                                     blackjack.Card('H', '6')]
         self.assertFalse(test_table.dealers_move())
-
-    def test_dealers_move_3(self):
-        """input less than 17"""
-        test_table = blackjack.Table(1)
-        test_table.dealers_cards = [blackjack.Card('H', '9'),
-                                    blackjack.Card('H', '9')]
-        result = test_table.dealers_move()
-        expected = [True, False]
-        expected.extend([x for x in range(17, 22)])
-        self.assertIn(result, expected)
-
-    def test_dealers_move_4(self):
-        """input in (17,21)"""
-        test_table = blackjack.Table(1)
-        test_table.dealers_cards = [blackjack.Card('H', '9'),
-                                    blackjack.Card('H', '9')]
-        self.assertEqual(test_table.dealers_move(), 18)
 
     def test_player_hit(self):
         """player takes card"""

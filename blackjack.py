@@ -201,7 +201,7 @@ class Table():
     def hand_value(self, cards):
         """
         return blackjack hand value. Determine Ace to be 1 or 11.
-        If value == 21 return True, if over return False
+        Return cards value
         """
         hand_value = 0
         for card in cards:
@@ -211,13 +211,8 @@ class Table():
             if card.value == 0 and hand_value > 10:
                 hand_value += 1
             elif card.value == 0 and hand_value <= 10:
-                hand_value += 11
-        if hand_value > 21:
-            return False
-        elif hand_value == 21:
-            return True
-        else:
-            return hand_value
+                hand_value += 11    
+        return hand_value
 
     def new_game(self):
         """initial deal"""
@@ -227,28 +222,18 @@ class Table():
 
     def dealers_move(self):
         """
-        return True if dealer's 21,
-        False if dealer busts or value 17-21 
+        takes cards until 17 or more
         """
 
         while True:
             
             hand = self.hand_value(self.dealers_cards)
-            if hand is True:
-                # dealer's 21
-                return True
-            
-            elif hand is False:
-                # dealer busts
-                return False
+            if hand >= 17:
+                break
 
             elif hand < 17:
                 # dealer takes card
                 self.dealers_cards.append(self.deck.deal())
-
-            else:
-                # dealer's hand
-                return hand
 
     def player_hit(self):
         """player takes a card"""
@@ -263,20 +248,20 @@ class Table():
         dealer_result = self.hand_value(self.dealers_cards)
 
         # Tie blackjack
-        if player_result == dealer_result is True:
+        if player_result == dealer_result == 21:
             print('Blackjack tie!')
             self.player1.win(self.player1.bet_ammount)
             return True
-        
+
         # Player blackjack
-        elif dealer_result != player_result is True:
+        elif dealer_result != player_result == 21:
             print('Player has blackjack!')
             price = int(self.player1.bet_ammount * 5 / 2)
             self.player1.win(price)
             return True
         
         # dealer blackjack
-        elif player_result != dealer_result is True:
+        elif player_result != dealer_result == 21:
             print('Dealer has blackjack!')
             return True
 
@@ -291,30 +276,33 @@ class Table():
         dealer_result = self.hand_value(self.dealers_cards)
         print(f'Player {player_result}\nDealer {dealer_result}')
         
-        # Tie
-        if player_result == dealer_result is not False:
-            print('Tie!')
-            self.player1.win(self.player1.bet_ammount)
+        # player over 21
+        if player_result > 21:
+            print('Player lost!')
 
-        # Player 21 dealer not
-        elif dealer_result != player_result is True:
-            print('Player wins!')
-            price = self.player1.bet_ammount * 2
-            self.player1.win(price)
-        
-        # dealer 21 player not
-        elif player_result != dealer_result is True:
-            print('Player lost')
-
-        # player wins
-        elif player_result > dealer_result:
+        # dealer over 21
+        elif dealer_result > 21:
             print('Player wins!')
             price = self.player1.bet_ammount * 2
             self.player1.win(price)
 
-        # player lost
-        elif player_result < dealer_result:
-            print('Player lost')
+        # both 21 or less
+        else:
+
+            # tie
+            if player_result == dealer_result:
+                print('Tie!')
+                self.player1.win(self.player1.bet_ammount)
+
+            # player > dealer
+            elif player_result > dealer_result:
+                print('Player wins!')
+                price = self.player1.bet_ammount * 2
+                self.player1.win(price)
+
+            # player < dealer
+            else:
+                print('Player lost')
 
     def end_round(self):
         """return cards to deck"""
@@ -331,11 +319,12 @@ class Table():
 
         clr_scr()
         print(f'Round: {self.round_counter}')
-        print("Dealer's cards:")
         if show_all is True:
+            print(f"Dealer's cards ({self.hand_value(self.dealers_cards)}):")
             for card in self.dealers_cards:
                 print(card)
         else:
+            print("Dealer's cards:")
             print(self.dealers_cards[0])
             for card in self.dealers_cards[1:]:
                 print('[]')
@@ -422,8 +411,9 @@ def main():
                     elif table.player1.decision_result == 's':
                         break
                     
-                    # player bust
-                    if isinstance(table.hand_value(table.player_cards), bool):
+                    # player bust or 21
+                    #if isinstance(table.hand_value(table.player_cards), bool):
+                    if table.hand_value(table.player_cards) >= 21:
                         break
     
                 table.dealers_move()
