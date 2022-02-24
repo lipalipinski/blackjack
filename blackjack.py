@@ -32,40 +32,22 @@ class Card():
         return self.value
 
     def __lt__(self, other):
-        if isinstance(other, Card):
-            return self.value < other.value
-        else:
-            return self.value < other
+        return self.value < other
 
     def __le__(self, other):
-        if isinstance(other, Card):
-            return self.value <= other.value
-        else:
-            return self.value <= other
+        return self.value <= other
 
     def __eq__(self, other):
-        if isinstance(other, Card):
-            return self.value == other.value
-        else:
-            return self.value == other
+        return self.value == other
 
     def __ne__(self, other):
-        if isinstance(other, Card):
-            return self.value != other.value
-        else:
-            return self.value != other
+        return self.value != other
 
     def __gt__(self, other):
-        if isinstance(other, Card):
-            return self.value < other.value
-        else:
-            return self.value < other
+        return self.value < other
 
     def __ge__(self, other):
-        if isinstance(other, Card):
-            return self.value <= other.value
-        else:
-            return self.value <= other
+        return self.value <= other
 
 
 class Decks():
@@ -432,20 +414,21 @@ class Menu():
 
     def __init__(self):
         self.state = 0
+        self.logo = [
+                    r'     ____   __              __      _               __  ',
+                    r'    / __ ) / /____ _ _____ / /__   (_)____ _ _____ / /__',
+                    r'   / __  |/ // __ `// ___// //_/  / // __ `// ___// //_/',
+                    r'  / /_/ // // /_/ // /__ / ,<    / // /_/ // /__ / ,<   ',
+                    r' /_____//_/ \__,_/ \___//_/|_|__/ / \__,_/ \___//_/|_|  ',
+                    r'                             /___/                      ',
+                    r'                                            by JL       '
+                    ]
 
     def display_menu(self):
         """display main menu"""
 
-        logo = [r'     ____   __              __      _               __  ',
-                r'    / __ ) / /____ _ _____ / /__   (_)____ _ _____ / /__',
-                r'   / __  |/ // __ `// ___// //_/  / // __ `// ___// //_/',
-                r'  / /_/ // // /_/ // /__ / ,<    / // /_/ // /__ / ,<   ',
-                r' /_____//_/ \__,_/ \___//_/|_|__/ / \__,_/ \___//_/|_|  ',
-                r'                             /___/                      ',
-                r'                                            by JL       ']
-
         clr_scr()
-        for line in logo:
+        for line in self.logo:
             print(line)
         print('{0:^60}'.format('Menu:'))
         print('{0:^60}'.format('1 - new game'))
@@ -459,6 +442,14 @@ class Menu():
             if inp in [1, 2]:
                 self.state = inp
                 break
+
+    def outro(self):
+        """goodbye message"""
+        clr_scr()
+        for line in self.logo:
+            print(line)
+        print('{0:^60}'.format('Bye!'))
+        print('{0:^60}'.format('2022'))
 
 
 def main():
@@ -526,6 +517,9 @@ def main():
                 if table.end_round() is False:
                     main_menu.state = 0
                     break
+
+    # outro
+    main_menu.outro()
 
 
 if __name__ == "__main__":
