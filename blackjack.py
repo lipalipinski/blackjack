@@ -192,16 +192,25 @@ class Player():
         """
         self.account += ammount
 
-    def decision(self):
+    def decision(self, hand):
         """
-        returns 'h' (hit) / 's' (stand) / False on user quit
+        hand - [] of cards in hand
+        return 'h' (hit) / 's' (stand) / 'd' (double-down) False on user quit
         """
 
         self.decision_result = None
+        options = ['h', 's']
+        prompt = 'Type [h]it / [s]tand'
         decision = ' '
+
+        # possible double down?
+        if self.account >= self.bet_ammount and len(hand) == 2:
+            options.append('d')
+            prompt += ' / [d]ouble down'
+
         while True:
-            decision = input('Type [h] for hit or [s] for stand: ')
-            if decision in ['h', 's']:
+            decision = input(prompt + ': ')
+            if decision in options:
                 self.decision_result = decision
                 break
             elif decision == 'Q':
@@ -224,6 +233,7 @@ class Table():
         # display
         self.dealer_bjck = ''
         self.round_result_disp = ''
+        self.messages = []
 
     def hand_value(self, cards):
         """
@@ -385,12 +395,15 @@ class Table():
 
         # show all
         if show_all is True:
+            # cards
             print('{0:<30}{1:>30}'.format(' '.join(d_cards_li),
                                           ' '.join(p_cards_li)))
+            # hand values
             print('{0:<30}{1:>30}'.format(
                     f'({self.hand_value(self.dealers_cards)})',
                     f'({self.hand_value(self.player_cards)})'
                     ))
+            # blackjack / bust
             print('{0:<30}{1:>30}'.format(self.dealer_bjck, self.player1.bjck))
 
         # hide dealer's cards
@@ -402,6 +415,10 @@ class Table():
                   f'({self.hand_value(self.player_cards)})'
                   ))
             print('{0:>60}'.format(self.player1.bjck))
+
+        for message in self.messages:
+            print('{0:^60}'.format(message))
+        self.messages = []
 
         print('{0:^60}'.format(self.round_result_disp))
 
@@ -493,7 +510,7 @@ def main():
                 while True:
 
                     # player quits game
-                    if table.player1.decision() is False:
+                    if table.player1.decision(table.player_cards) is False:
                         main_menu.state = 0
                         break
 
@@ -504,6 +521,14 @@ def main():
 
                     # player stands
                     elif table.player1.decision_result == 's':
+                        break
+
+                    # player double down
+                    if table.player1.decision_result == 'd':
+                        table.messages.append('Double down!')
+                        table.player1.account -= table.player1.bet_ammount
+                        table.player1.bet_ammount *= 2
+                        table.player_hit()
                         break
 
                     # player bust or 21
