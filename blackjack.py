@@ -26,7 +26,46 @@ class Card():
         self.value = rank_values[rank]
 
     def __str__(self):
-        return ' '.join([self.rank, suits[self.suit]])
+        return ''.join([self.rank, suits[self.suit]])
+
+    def __int__(self):
+        return self.value
+
+    def __lt__(self, other):
+        if isinstance(other, Card):
+            return self.value < other.value
+        else:
+            return self.value < other
+
+    def __le__(self, other):
+        if isinstance(other, Card):
+            return self.value <= other.value
+        else:
+            return self.value <= other
+
+    def __eq__(self, other):
+        if isinstance(other, Card):
+            return self.value == other.value
+        else:
+            return self.value == other
+        
+    def __ne__(self, other):
+        if isinstance(other, Card):
+            return self.value != other.value
+        else:
+            return self.value != other
+
+    def __gt__(self, other):
+        if isinstance(other, Card):
+            return self.value < other.value
+        else:
+            return self.value < other
+
+    def __ge__(self, other):
+        if isinstance(other, Card):
+            return self.value <= other.value
+        else:
+            return self.value <= other
 
 
 class Decks():
@@ -106,6 +145,8 @@ class Player():
         self.bet_ammount = 0
         self.decision_result = None
 
+        self.bjck = ''
+
     def __str__(self):
         return f'Player {self.name}: {self.account}$'
 
@@ -156,7 +197,7 @@ class Player():
                     print('Bet value should be a number.')
                     continue
 
-                if value in range(min_bet, self.account):
+                if value in range(min_bet, self.account + 1):
                     break
                 else:
                     print(f'Bet value should be between {min_bet} and {self.account}')
@@ -196,7 +237,11 @@ class Table():
         self.player1 = Player('Player1', 1000)
         self.dealers_cards = []
         self.player_cards = []
-        self.round_counter = 0
+        self.round_counter = 1
+
+        # display
+        self.dealer_bjck = ''
+        self.round_result_disp = ''
 
     def hand_value(self, cards):
         """
@@ -249,20 +294,24 @@ class Table():
 
         # Tie blackjack
         if player_result == dealer_result == 21:
-            print('Blackjack tie!')
+            self.dealer_bjck = 'Blackjack!'
+            self.player1.bjck = 'Blackjack!'
+            self.round_result_disp = 'Tie!'
             self.player1.win(self.player1.bet_ammount)
             return True
 
         # Player blackjack
         elif dealer_result != player_result == 21:
-            print('Player has blackjack!')
+            self.player1.bjck = 'Blackjack!'
+            self.round_result_disp = f'Player wins! (Bank +{int(self.player1.bet_ammount*3/2)}$)'
             price = int(self.player1.bet_ammount * 5 / 2)
             self.player1.win(price)
             return True
         
         # dealer blackjack
         elif player_result != dealer_result == 21:
-            print('Dealer has blackjack!')
+            self.dealer_bjck = 'Blackjack!'
+            self.round_result_disp = f'Player lost! (lost bet: {self.player1.bet_ammount}$)'
             return True
 
         # no blackjack
@@ -276,13 +325,17 @@ class Table():
         dealer_result = self.hand_value(self.dealers_cards)
         print(f'Player {player_result}\nDealer {dealer_result}')
         
+        if dealer_result > 21:
+            self.dealer_bjck = 'Bust!'
+
         # player over 21
         if player_result > 21:
-            print('Player lost!')
+            self.round_result_disp = f'Player lost! (lost bet: {self.player1.bet_ammount}$)'
+            self.player1.bjck = 'Bust!'
 
         # dealer over 21
         elif dealer_result > 21:
-            print('Player wins!')
+            self.round_result_disp = f'Player wins! (Bank +{self.player1.bet_ammount})'
             price = self.player1.bet_ammount * 2
             self.player1.win(price)
 
@@ -291,18 +344,19 @@ class Table():
 
             # tie
             if player_result == dealer_result:
-                print('Tie!')
+                self.round_result_disp = 'Tie!'
                 self.player1.win(self.player1.bet_ammount)
 
             # player > dealer
             elif player_result > dealer_result:
-                print('Player wins!')
+                self.round_result_disp = f'Player wins! (Bank +{self.player1.bet_ammount}$)'
                 price = self.player1.bet_ammount * 2
                 self.player1.win(price)
 
             # player < dealer
             else:
-                print('Player lost')
+                self.round_result_disp = f'Player lost! (lost bet: {self.player1.bet_ammount}$)'
+        self.player1.bet_ammount = 0
 
     def end_round(self):
         """return cards to deck"""
@@ -310,29 +364,60 @@ class Table():
         self.deck.return_cards(self.player_cards)
         self.dealers_cards = []
         self.player_cards = []
+        
+        self.dealer_bjck = ''
+        self.player1.bjck = ''
+        self.round_result_disp = ''
         self.round_counter += 1
+
+        input('Press [ENTER] to continnue...')
 
     def display(self, show_all=False):
         """
         display game. show_all - if False show only first dealer's card
         """
 
-        clr_scr()
-        print(f'Round: {self.round_counter}')
-        if show_all is True:
-            print(f"Dealer's cards ({self.hand_value(self.dealers_cards)}):")
-            for card in self.dealers_cards:
-                print(card)
-        else:
-            print("Dealer's cards:")
-            print(self.dealers_cards[0])
-            for card in self.dealers_cards[1:]:
-                print('[]')
-        print(f"Player's cards ({self.hand_value(self.player_cards)}):")
+        self.player_cards.sort()
+        self.dealers_cards.sort()
+
+        p_cards_li = []
         for card in self.player_cards:
-            print(card)
-        print(f"Player's bank: {self.player1.account}$")
-        print(f"Player's bet: {self.player1.bet_ammount}$")
+                p_cards_li.append(str(card))
+
+        d_cards_li = []
+        for card in self.dealers_cards:
+                d_cards_li.append(str(card))
+
+        clr_scr()
+        print('{0:^60}'.format(f'Round: {self.round_counter}'))
+        print('{0:<30}{1:>30}'.format(
+               "Dealer:",
+               "Player:"
+               ))
+        print("{0:>60}".format(f"bank: {self.player1.account}$"))
+        print("{0:>60}".format(f"bet: {self.player1.bet_ammount}$\n"))
+
+        # show all
+        if show_all is True:
+            print('{0:<30}{1:>30}'.format(' '.join(d_cards_li),
+                                          ' '.join(p_cards_li)))
+            print('{0:<30}{1:>30}'.format(self.dealer_bjck, self.player1.bjck))
+            print('{0:<30}{1:>30}'.format(
+                    f'({self.hand_value(self.dealers_cards)})',
+                    f'({self.hand_value(self.player_cards)})'
+                    ))
+
+        # hide dealer's cards
+        else:        
+            print('{0:<30}{1:>30}'.format(f'{str(self.dealers_cards[0])} []',
+                                          ' '.join(p_cards_li)))
+            print('{0:>60}'.format(self.player1.bjck))
+            print('{0:<30}{1:>30}'.format(
+                  '(?)',
+                  f'({self.hand_value(self.player_cards)})'
+                  ))
+
+        print('{0:^60}'.format(self.round_result_disp))
 
 
 class Menu():
@@ -347,9 +432,21 @@ class Menu():
     def display_menu(self):
         """display main menu"""
 
+        logo = ['     ____   __              __      _               __  ',
+                '    / __ ) / /____ _ _____ / /__   (_)____ _ _____ / /__',
+                '   / __  |/ // __ `// ___// //_/  / // __ `// ___// //_/',
+                '  / /_/ // // /_/ // /__ / ,<    / // /_/ // /__ / ,<   ',
+                ' /_____//_/ \__,_/ \___//_/|_|__/ / \__,_/ \___//_/|_|  ',
+                '                             /___/                      ',
+                '                                            by JL       ']
+       
         clr_scr()
-        print('Blackjack\nJL 2022\n')
-        print('1 - new game\n2 - quit')
+        for line in logo:
+            print(line)
+        print('{0:^60}'.format('Menu:'))
+        print('{0:^60}'.format('1 - new game'))
+        print('{0:^60}'.format('2 - quit'))
+
         while True:
             try:
                 inp = int(input())
@@ -379,6 +476,8 @@ def main():
 
             # game loop
             while True:
+
+                table.display(True)
                 table.new_game()
 
                 # player bets
@@ -391,6 +490,7 @@ def main():
                 # check if blackjack
                 if table.is_blackjack() is True:
                     # if blackjack start over
+                    table.display(True)
                     table.end_round()
                     continue
 
@@ -417,8 +517,8 @@ def main():
                         break
     
                 table.dealers_move()
-                table.display(True)
                 table.round_result()
+                table.display(True)
                 table.end_round()
 
 
