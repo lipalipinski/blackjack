@@ -1,5 +1,5 @@
 """
-Blackjack
+Blackjack v1
 by JL 2022
 """
 import random
@@ -48,7 +48,7 @@ class Card():
             return self.value == other.value
         else:
             return self.value == other
-        
+
     def __ne__(self, other):
         if isinstance(other, Card):
             return self.value != other.value
@@ -170,13 +170,13 @@ class Player():
             while True:
                 inp = input(f'Not enaught money to bet ({self.account}$)\n'
                             'Do you want to go all in? (y/n)')
-                
+
                 # go all in
                 if inp in ['y', 'Y']:
                     self.bet_ammount = self.account
                     self.account = 0
                     break
-                
+
                 # end game
                 elif inp in ['n', 'N']:
                     while True:
@@ -189,7 +189,7 @@ class Player():
             value = 0
             while True:
                 try:
-                    value = input(f'{self.name} type your bet value (bank: {self.account}$):')
+                    value = input(f'Type your bet value (bank: {self.account}$):')
                     if value == 'Q':
                         return False
                     value = int(value)
@@ -256,7 +256,7 @@ class Table():
             if card.value == 0 and hand_value > 10:
                 hand_value += 1
             elif card.value == 0 and hand_value <= 10:
-                hand_value += 11    
+                hand_value += 11
         return hand_value
 
     def new_game(self):
@@ -271,7 +271,7 @@ class Table():
         """
 
         while True:
-            
+
             hand = self.hand_value(self.dealers_cards)
             if hand >= 17:
                 break
@@ -307,7 +307,7 @@ class Table():
             price = int(self.player1.bet_ammount * 5 / 2)
             self.player1.win(price)
             return True
-        
+
         # dealer blackjack
         elif player_result != dealer_result == 21:
             self.dealer_bjck = 'Blackjack!'
@@ -316,7 +316,7 @@ class Table():
 
         # no blackjack
         return False
-    
+
     def round_result(self):
         """
         determine round results
@@ -324,7 +324,7 @@ class Table():
         player_result = self.hand_value(self.player_cards)
         dealer_result = self.hand_value(self.dealers_cards)
         print(f'Player {player_result}\nDealer {dealer_result}')
-        
+
         if dealer_result > 21:
             self.dealer_bjck = 'Bust!'
 
@@ -335,7 +335,7 @@ class Table():
 
         # dealer over 21
         elif dealer_result > 21:
-            self.round_result_disp = f'Player wins! (Bank +{self.player1.bet_ammount})'
+            self.round_result_disp = f'Player wins! (Bank +{self.player1.bet_ammount}$)'
             price = self.player1.bet_ammount * 2
             self.player1.win(price)
 
@@ -364,13 +364,16 @@ class Table():
         self.deck.return_cards(self.player_cards)
         self.dealers_cards = []
         self.player_cards = []
-        
+
+        self.player1.bet_ammount = 0
         self.dealer_bjck = ''
         self.player1.bjck = ''
         self.round_result_disp = ''
         self.round_counter += 1
 
-        input('Press [ENTER] to continnue...')
+        decision = input('Press [ENTER] to continnue, press [q] to quit game...')
+        if decision in ['Q', 'q']:
+            return False
 
     def display(self, show_all=False):
         """
@@ -382,11 +385,11 @@ class Table():
 
         p_cards_li = []
         for card in self.player_cards:
-                p_cards_li.append(str(card))
+            p_cards_li.append(str(card))
 
         d_cards_li = []
         for card in self.dealers_cards:
-                d_cards_li.append(str(card))
+            d_cards_li.append(str(card))
 
         clr_scr()
         print('{0:^60}'.format(f'Round: {self.round_counter}'))
@@ -395,27 +398,28 @@ class Table():
                "Player:"
                ))
         print("{0:>60}".format(f"bank: {self.player1.account}$"))
-        print("{0:>60}".format(f"bet: {self.player1.bet_ammount}$\n"))
+        print("{0:>60}".format(f"bet: {self.player1.bet_ammount}$"))
+        print('')
 
         # show all
         if show_all is True:
             print('{0:<30}{1:>30}'.format(' '.join(d_cards_li),
                                           ' '.join(p_cards_li)))
-            print('{0:<30}{1:>30}'.format(self.dealer_bjck, self.player1.bjck))
             print('{0:<30}{1:>30}'.format(
                     f'({self.hand_value(self.dealers_cards)})',
                     f'({self.hand_value(self.player_cards)})'
                     ))
+            print('{0:<30}{1:>30}'.format(self.dealer_bjck, self.player1.bjck))
 
         # hide dealer's cards
-        else:        
+        else:
             print('{0:<30}{1:>30}'.format(f'{str(self.dealers_cards[0])} []',
                                           ' '.join(p_cards_li)))
-            print('{0:>60}'.format(self.player1.bjck))
             print('{0:<30}{1:>30}'.format(
                   '(?)',
                   f'({self.hand_value(self.player_cards)})'
                   ))
+            print('{0:>60}'.format(self.player1.bjck))
 
         print('{0:^60}'.format(self.round_result_disp))
 
@@ -432,14 +436,14 @@ class Menu():
     def display_menu(self):
         """display main menu"""
 
-        logo = ['     ____   __              __      _               __  ',
-                '    / __ ) / /____ _ _____ / /__   (_)____ _ _____ / /__',
-                '   / __  |/ // __ `// ___// //_/  / // __ `// ___// //_/',
-                '  / /_/ // // /_/ // /__ / ,<    / // /_/ // /__ / ,<   ',
-                ' /_____//_/ \__,_/ \___//_/|_|__/ / \__,_/ \___//_/|_|  ',
-                '                             /___/                      ',
-                '                                            by JL       ']
-       
+        logo = [r'     ____   __              __      _               __  ',
+                r'    / __ ) / /____ _ _____ / /__   (_)____ _ _____ / /__',
+                r'   / __  |/ // __ `// ___// //_/  / // __ `// ___// //_/',
+                r'  / /_/ // // /_/ // /__ / ,<    / // /_/ // /__ / ,<   ',
+                r' /_____//_/ \__,_/ \___//_/|_|__/ / \__,_/ \___//_/|_|  ',
+                r'                             /___/                      ',
+                r'                                            by JL       ']
+
         clr_scr()
         for line in logo:
             print(line)
@@ -471,7 +475,7 @@ def main():
 
         # new game
         elif main_menu.state == 1:
-            
+
             table = Table(1)
 
             # game loop
@@ -486,7 +490,7 @@ def main():
                     break
 
                 table.display()
-                
+
                 # check if blackjack
                 if table.is_blackjack() is True:
                     # if blackjack start over
@@ -501,7 +505,7 @@ def main():
                     if table.player1.decision() is False:
                         main_menu.state = 0
                         break
-                    
+
                     # player hits - dealer's turn
                     if table.player1.decision_result == 'h':
                         table.player_hit()
@@ -510,16 +514,18 @@ def main():
                     # player stands
                     elif table.player1.decision_result == 's':
                         break
-                    
+
                     # player bust or 21
-                    #if isinstance(table.hand_value(table.player_cards), bool):
                     if table.hand_value(table.player_cards) >= 21:
                         break
-    
+
                 table.dealers_move()
                 table.round_result()
                 table.display(True)
-                table.end_round()
+
+                if table.end_round() is False:
+                    main_menu.state = 0
+                    break
 
 
 if __name__ == "__main__":
