@@ -1,6 +1,8 @@
 # Blackjack
 ## by JL (lipabass@gmail.com)
 
+Python 3.9.7
+
 Inspired by a bootcamp assignment. Original requirements:
 
 > * You need to create a simple text-based BlackJack game
@@ -16,6 +18,6 @@ Inspired by a bootcamp assignment. Original requirements:
 > use functions in your game. Use classes to help you define the Deck and the 
 > Player's hand. There are many right ways to do this, so explore it well!
 
-I have also incorporated some automatic tests I have created using unittest module in **test.py**.
+I have created some tests using unittest module in **test.py**.
 
 *JL 2022*
