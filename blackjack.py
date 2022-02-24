@@ -171,7 +171,7 @@ class Player():
             value = 0
             while True:
                 try:
-                    value = input(f'Type your bet value (bank: {self.account}$):')
+                    value = input(f'Type your bet value (bank: {self.account}$): ')
                     if value == 'Q':
                         return False
                     value = int(value)
@@ -415,14 +415,14 @@ class Menu():
     def __init__(self):
         self.state = 0
         self.logo = [
-                    r'     ____   __              __      _               __  ',
-                    r'    / __ ) / /____ _ _____ / /__   (_)____ _ _____ / /__',
-                    r'   / __  |/ // __ `// ___// //_/  / // __ `// ___// //_/',
-                    r'  / /_/ // // /_/ // /__ / ,<    / // /_/ // /__ / ,<   ',
-                    r' /_____//_/ \__,_/ \___//_/|_|__/ / \__,_/ \___//_/|_|  ',
-                    r'                             /___/                      ',
-                    r'                                            by JL       '
-                    ]
+                r'     ____   __              __      _               __  ',
+                r'    / __ ) / /____ _ _____ / /__   (_)____ _ _____ / /__',
+                r'   / __  |/ // __ `// ___// //_/  / // __ `// ___// //_/',
+                r'  / /_/ // // /_/ // /__ / ,<    / // /_/ // /__ / ,<   ',
+                r' /_____//_/ \__,_/ \___//_/|_|__/ / \__,_/ \___//_/|_|  ',
+                r'                             /___/                      ',
+                r'                                            by JL       '
+                ]
 
     def display_menu(self):
         """display main menu"""
