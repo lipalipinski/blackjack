@@ -465,10 +465,11 @@ class Menu():
         '''game info'''
 
         a = ['                                                        ',
-             'Players play against dealer. Aim is to get as close to  ',
+             'Player plays against dealer. Aim is to get as close to  ',
              '21 as possible, but not higher! Two = 2, Three = 3 etc..',
              'Face Cards = 10, Ace = 1 or 11, whichever gives better  ',
-             'score. Game run:                                                 ',
+             'score.                                                  ', 
+             'Game run:                                               ',
              '1 - player places a bet                                 ',
              '2 - two cards for player (faces up) and for dealer (one ',
              '    up, one down)                                       ',
@@ -476,10 +477,15 @@ class Menu():
              '    down (doble the bet and take exactly one card)      ',
              '4 - dealer takes cards until he riches 17 or more       ',
              '5 - turn result (bet is being returned on tie game)     ',
+             '                                                        ',
              'Blackjack (two cards of 21 value) always wins, except   ',
              'for a tie game. Winning with blackjack gives 3/2 of a bet',
+             'The deck is being shuffled after reaching a cut card when',
+             'there is no cards on the table. Cut card is placed      ',
+             'randomly by a dealer (between 15th and 25th cardfrom the',
+             'bottom)                                                 ',
              '                                                        ',
-             'GOOD LUCK!                                              ',]
+             'GOOD LUCK!                                              ']
 
         clr_scr()
         print(*self.logo, sep='\n')
