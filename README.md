@@ -23,5 +23,6 @@ I have created some tests using unittest module in **test.py**.
 * 25.02.2022:
   * display messages
   * double down
+  * about section
 
 *JL 2022*

@@ -426,7 +426,8 @@ class Table():
 class Menu():
     """
     main menu.
-    state 0 - show menu, 1 - new game, 2 - quit game
+    state 0 - show menu, 1 - new game,
+    2 - about, 3 - quit game
     """
 
     def __init__(self):
@@ -445,26 +446,51 @@ class Menu():
         """display main menu"""
 
         clr_scr()
-        for line in self.logo:
-            print(line)
+        print(*self.logo, sep='\n')
         print('{0:^60}'.format('Menu:'))
         print('{0:^60}'.format('1 - new game'))
-        print('{0:^60}'.format('2 - quit'))
+        print('{0:^60}'.format('2 - about'))
+        print('{0:^60}'.format('3 - quit'))
 
         while True:
             try:
                 inp = int(input())
             except ValueError:
                 print('Incorrect value')
-            if inp in [1, 2]:
+            if inp in [1, 2, 3]:
                 self.state = inp
                 break
+
+    def about(self):
+        '''game info'''
+
+        a = ['                                                        ',
+             'Players play against dealer. Aim is to get as close to  ',
+             '21 as possible, but not higher! Two = 2, Three = 3 etc..',
+             'Face Cards = 10, Ace = 1 or 11, whichever gives better  ',
+             'score. Game run:                                                 ',
+             '1 - player places a bet                                 ',
+             '2 - two cards for player (faces up) and for dealer (one ',
+             '    up, one down)                                       ',
+             '3 - players move: hit (take a card)/stand (pass)/double ',
+             '    down (doble the bet and take exactly one card)      ',
+             '4 - dealer takes cards until he riches 17 or more       ',
+             '5 - turn result (bet is being returned on tie game)     ',
+             'Blackjack (two cards of 21 value) always wins, except   ',
+             'for a tie game. Winning with blackjack gives 3/2 of a bet',
+             '                                                        ',
+             'GOOD LUCK!                                              ',]
+
+        clr_scr()
+        print(*self.logo, sep='\n')
+        print(*a, sep='\n')
+        input('Press [ENTER] to exit...')
+        self.state = 0
 
     def outro(self):
         """goodbye message"""
         clr_scr()
-        for line in self.logo:
-            print(line)
+        print(*self.logo, sep='\n')
         print('{0:^60}'.format('Bye!'))
         print('{0:^60}'.format('2022'))
 
@@ -475,11 +501,15 @@ def main():
     """
 
     main_menu = Menu()
-    while main_menu.state != 2:
+    while main_menu.state != 3:
 
         # display menu
         if main_menu.state == 0:
             main_menu.display_menu()
+
+        # display menu
+        if main_menu.state == 2:
+            main_menu.about()
 
         # new game
         elif main_menu.state == 1:
