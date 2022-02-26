@@ -44,10 +44,10 @@ class Card():
         return self.value != other
 
     def __gt__(self, other):
-        return self.value < other
+        return self.value > other
 
     def __ge__(self, other):
-        return self.value <= other
+        return self.value >= other
 
 
 class Decks():
@@ -315,7 +315,6 @@ class Table():
         """
         player_result = self.hand_value(self.player_cards)
         dealer_result = self.hand_value(self.dealers_cards)
-        print(f'Player {player_result}\nDealer {dealer_result}')
 
         if dealer_result > 21:
             self.dealer_bjck = 'Bust!'
@@ -468,7 +467,7 @@ class Menu():
              'Player plays against dealer. Aim is to get as close to  ',
              '21 as possible, but not higher! Two = 2, Three = 3 etc..',
              'Face Cards = 10, Ace = 1 or 11, whichever gives better  ',
-             'score.                                                  ', 
+             'score.                                                  ',
              'Game run:                                               ',
              '1 - player places a bet                                 ',
              '2 - two cards for player (faces up) and for dealer (one ',
@@ -575,6 +574,7 @@ def main():
                 table.round_result()
                 table.display(True)
 
+                # [q] for quit
                 if table.end_round() is False:
                     main_menu.state = 0
                     break
