@@ -125,6 +125,7 @@ class Player():
         self.name = name
         self.account = account
         self.bet_ammount = 0
+        self.hand = []
         self.decision_result = None
 
         self.bjck = ''
@@ -186,13 +187,17 @@ class Player():
             self.account -= value
             self.bet_ammount = value
 
+    def hit(self, deck):
+        """player takes a cardfrom a deck"""
+        self.hand.append(deck.deal())
+
     def win(self, ammount):
         """
         add ammount to account
         """
         self.account += ammount
 
-    def decision(self, hand):
+    def decision(self,):
         """
         hand - [] of cards in hand
         return 'h' (hit) / 's' (stand) / 'd' (double-down) False on user quit
@@ -204,7 +209,7 @@ class Player():
         decision = ' '
 
         # possible double down?
-        if self.account >= self.bet_ammount and len(hand) == 2:
+        if self.account >= self.bet_ammount and len(self.hand) == 2:
             options.append('d')
             prompt += ' / [d]ouble down'
 
@@ -222,16 +227,17 @@ class Table():
     main table. hold players, cards and display
     """
 
-    def __init__(self, decks_num):
+    def __init__(self, decks_num, start_credit=1000):
         """decks_num - number of decks"""
         self.deck = Decks(decks_num)
-        self.player1 = Player('Player1', 1000)
-        self.dealers_cards = []
-        self.player_cards = []
+        self.player1 = Player('Player1', start_credit)
         self.round_counter = 1
 
-        # display
+        # dealer
+        self.dealers_cards = []
         self.dealer_bjck = ''
+
+        # display
         self.round_result_disp = ''
         self.messages = []
 
@@ -255,7 +261,7 @@ class Table():
         """initial deal"""
         for _ in [0, 1]:
             self.dealers_cards.append(self.deck.deal())
-            self.player_cards.append(self.deck.deal())
+            self.player1.hit(self.deck)
 
     def dealers_move(self):
         """
@@ -272,16 +278,12 @@ class Table():
                 # dealer takes card
                 self.dealers_cards.append(self.deck.deal())
 
-    def player_hit(self):
-        """player takes a card"""
-        self.player_cards.append(self.deck.deal())
-
     def is_blackjack(self):
         """
         check if blackjack (after first deal).
         return True if blackjack, False if not
         """
-        player_result = self.hand_value(self.player_cards)
+        player_result = self.hand_value(self.player1.hand)
         dealer_result = self.hand_value(self.dealers_cards)
 
         # Tie blackjack
@@ -289,6 +291,8 @@ class Table():
             self.dealer_bjck = 'Blackjack!'
             self.player1.bjck = 'Blackjack!'
             self.round_result_disp = 'Tie!'
+
+            # return bet to player's credit
             self.player1.win(self.player1.bet_ammount)
             return True
 
@@ -296,6 +300,8 @@ class Table():
         elif dealer_result != player_result == 21:
             self.player1.bjck = 'Blackjack!'
             self.round_result_disp = f'Player wins! (Bank +{int(self.player1.bet_ammount*3/2)}$)'
+            
+            # return bet + price to player
             price = int(self.player1.bet_ammount * 5 / 2)
             self.player1.win(price)
             return True
@@ -313,7 +319,7 @@ class Table():
         """
         determine round results
         """
-        player_result = self.hand_value(self.player_cards)
+        player_result = self.hand_value(self.player1.hand)
         dealer_result = self.hand_value(self.dealers_cards)
 
         if dealer_result > 21:
@@ -352,9 +358,9 @@ class Table():
     def end_round(self):
         """return cards to deck"""
         self.deck.return_cards(self.dealers_cards)
-        self.deck.return_cards(self.player_cards)
         self.dealers_cards = []
-        self.player_cards = []
+        self.deck.return_cards(self.player1.hand)
+        self.player1.hand = []
 
         self.player1.bet_ammount = 0
         self.dealer_bjck = ''
@@ -371,11 +377,11 @@ class Table():
         display game. show_all - if False show only first dealer's card
         """
 
-        self.player_cards.sort()
+        self.player1.hand.sort()
         self.dealers_cards.sort()
 
         p_cards_li = []
-        for card in self.player_cards:
+        for card in self.player1.hand:
             p_cards_li.append(str(card))
 
         d_cards_li = []
@@ -400,7 +406,7 @@ class Table():
             # hand values
             print('{0:<30}{1:>30}'.format(
                     f'({self.hand_value(self.dealers_cards)})',
-                    f'({self.hand_value(self.player_cards)})'
+                    f'({self.hand_value(self.player1.hand)})'
                     ))
             # blackjack / bust
             print('{0:<30}{1:>30}'.format(self.dealer_bjck, self.player1.bjck))
@@ -411,7 +417,7 @@ class Table():
                                           ' '.join(p_cards_li)))
             print('{0:<30}{1:>30}'.format(
                   '(?)',
-                  f'({self.hand_value(self.player_cards)})'
+                  f'({self.hand_value(self.player1.hand)})'
                   ))
             print('{0:>60}'.format(self.player1.bjck))
 
@@ -512,14 +518,14 @@ def main():
         if main_menu.state == 0:
             main_menu.display_menu()
 
-        # display menu
+        # display about
         if main_menu.state == 2:
             main_menu.about()
 
         # new game
         elif main_menu.state == 1:
 
-            table = Table(1)
+            table = Table(1, 1000)
 
             # game loop
             while True:
@@ -545,13 +551,13 @@ def main():
                 while True:
 
                     # player quits game
-                    if table.player1.decision(table.player_cards) is False:
+                    if table.player1.decision() is False:
                         main_menu.state = 0
                         break
 
                     # player hits - dealer's turn
                     if table.player1.decision_result == 'h':
-                        table.player_hit()
+                        table.player1.hit(table.deck)
                         table.display()
 
                     # player stands
@@ -563,11 +569,11 @@ def main():
                         table.messages.append('Double down!')
                         table.player1.account -= table.player1.bet_ammount
                         table.player1.bet_ammount *= 2
-                        table.player_hit()
+                        table.player1.hit(table.deck)
                         break
 
                     # player bust or 21
-                    if table.hand_value(table.player_cards) >= 21:
+                    if table.hand_value(table.player1.hand) >= 21:
                         break
 
                 table.dealers_move()

@@ -148,7 +148,7 @@ class TestTable(unittest.TestCase):
         """cards on the table"""
         test_table = blackjack.Table(1)
         test_table.new_game()
-        self.assertEqual(len(test_table.player_cards), 2)
+        self.assertEqual(len(test_table.player1.hand), 2)
         self.assertEqual(len(test_table.dealers_cards), 2)
 
     # .end_round
@@ -216,12 +216,6 @@ class TestTable(unittest.TestCase):
                                     blackjack.Card('H', '6')]
         self.assertFalse(test_table.dealers_move())
 
-    def test_player_hit(self):
-        """player takes card"""
-        test_table = blackjack.Table(1)
-        test_table.player_hit()
-        self.assertIsInstance(test_table.player_cards[0], blackjack.Card)
-
 
 class TestPlayer(unittest.TestCase):
     """blackjack.Player class"""
@@ -231,6 +225,13 @@ class TestPlayer(unittest.TestCase):
         test_player = blackjack.Player('x', 0)
         test_player.win(10)
         self.assertEqual(test_player.account, 10)
+
+    def test_hit(self):
+        """player takes card"""
+        test_player = blackjack.Player('x', 1000)
+        test_deck = blackjack.Decks(1)
+        test_player.hit(test_deck)
+        self.assertIsInstance(test_player.hand[0], blackjack.Card)
 
 
 if __name__ == '__main__':
