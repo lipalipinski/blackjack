@@ -15,11 +15,6 @@ def clr_scr():
     print('\n'*100)
 
 
-def game_over():
-    """display prompt and wait for enter"""
-    input('Game Over! Press [Enter] to continue...')
-
-
 class Card():
     '''
     single card class
@@ -203,7 +198,7 @@ class Player():
             while True:
                 try:
                     value = input(f'{self.name}, type your bet value (bank: {self.account}$): ')
-                    
+
                     if value == 'Q':
                         self.game_on = False
                         self.is_in = False
@@ -324,7 +319,7 @@ class Table():
 
         for _ in [0, 1]:
             self.dealers_cards.append(self.deck.deal())
-            for player in self.players: 
+            for player in self.players:
                 if player.is_in is True:
                     player.hit(self.deck)
 
@@ -355,7 +350,7 @@ class Table():
         if 21 in players_result and dealer_result == 21:
 
             for player in self.players:
-                
+
                 if player.is_in is True:
 
                     # player has blackjack
@@ -381,7 +376,7 @@ class Table():
         elif 21 in players_result and dealer_result != 21:
 
             for player in self.players:
-                
+
                 if player.is_in is True:
 
                     # player's blackjack
@@ -426,7 +421,8 @@ class Table():
         """
         determine round results
         """
-        players_result = [player.hand_value() for player in self.players]
+        for player in self.players:
+            player.hand_value()
         dealer_result = int(self.dealers_cards)
 
         # dealer bust
@@ -457,7 +453,7 @@ class Table():
             for player in self.players:
 
                 if player.is_in is True:
-                        
+
                     # player bust
                     if player.hand_value() > 21:
                         self.round_result_disp.append(
@@ -559,7 +555,7 @@ class Table():
         # multiplayer
         else:
 
-            # sort hands 
+            # sort hands
             for player in self.players:
                 player.hand.sort()
             self.dealers_cards.sort()
@@ -588,7 +584,7 @@ class Table():
             columns = ''
             rows = [[], [], [], [], [], [], []]
             for i, player in enumerate(self.players):
-                
+
                 columns += r'{'+str(i)+r':<20}'
 
                 rows[0].append(player.name)
@@ -659,32 +655,32 @@ class Menu():
     def about(self):
         '''game info'''
 
-        a = ['                                                        ',
-             'Player plays against dealer. Aim is to get as close to  ',
-             '21 as possible, but not higher! Two = 2, Three = 3 etc..',
-             'Face Cards = 10, Ace = 1 or 11, whichever gives better  ',
-             'score.                                                  ',
-             'Game run:                                               ',
-             '1 - player places a bet                                 ',
-             '2 - two cards for player (faces up) and for dealer (one ',
-             '    up, one down)                                       ',
-             '3 - players move: hit (take a card)/stand (pass)/double ',
-             '    down (doble the bet and take exactly one card)      ',
-             '4 - dealer takes cards until he riches 17 or more       ',
-             '5 - turn result (bet is being returned on tie game)     ',
-             '                                                        ',
-             'Blackjack (two cards of 21 value) always wins, except   ',
-             'for a tie game. Winning with blackjack gives 3/2 of a bet',
-             'The deck is being shuffled after reaching a cut card when',
-             'there is no cards on the table. Cut card is placed      ',
-             'randomly by a dealer (between 15th and 25th cardfrom the',
-             'bottom)                                                 ',
-             '                                                        ',
-             'GOOD LUCK!                                              ']
+        abc = ['                                                        ',
+               'Player plays against dealer. Aim is to get as close to  ',
+               '21 as possible, but not higher! Two = 2, Three = 3 etc..',
+               'Face Cards = 10, Ace = 1 or 11, whichever gives better  ',
+               'score.                                                  ',
+               'Game run:                                               ',
+               '1 - player places a bet                                 ',
+               '2 - two cards for player (faces up) and for dealer (one ',
+               '    up, one down)                                       ',
+               '3 - players move: hit (take a card)/stand (pass)/double ',
+               '    down (doble the bet and take exactly one card)      ',
+               '4 - dealer takes cards until he riches 17 or more       ',
+               '5 - turn result (bet is being returned on tie game)     ',
+               '                                                        ',
+               'Blackjack (two cards of 21 value) always wins, except   ',
+               'for a tie game. Winning with blackjack gives 3/2 of a bet',
+               'The deck is being shuffled after reaching a cut card when',
+               'there is no cards on the table. Cut card is placed      ',
+               'randomly by a dealer (between 15th and 25th cardfrom the',
+               'bottom)                                                 ',
+               '                                                        ',
+               'GOOD LUCK!                                              ']
 
         clr_scr()
         print(*self.logo, sep='\n')
-        print(*a, sep='\n')
+        print(*abc, sep='\n')
         input('Press [ENTER] to exit...')
         self.state = 0
 
