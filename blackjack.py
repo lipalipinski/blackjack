@@ -1,5 +1,5 @@
 """
-Blackjack v1
+Blackjack v2
 by JL 2022
 """
 import random
@@ -69,6 +69,7 @@ class Decks():
         self.cut_card = random.randint(15, 25)
         self.fresh_cards = []
         self.used_cards = []
+        self.messages = []
 
         for _ in range(number):
             for suit in suits.keys():
@@ -93,7 +94,7 @@ class Decks():
 
             # if no cards on the table
             if len(self.fresh_cards) + len(self.used_cards) == 52 * self.decks_number:
-                print('Cut card: shuffling the deck.')
+                self.messages.append('Cut card: shuffling the deck.')
                 self.fresh_cards.extend(self.used_cards)
                 self.used_cards = []
                 self.cut_card = random.randint(15, 25)
@@ -101,12 +102,12 @@ class Decks():
 
             # some cards on the table
             elif len(self.fresh_cards) > 0:
-                print('Cut card (dealing fresh)')
+                self.messages.append('Cut card (dealing fresh)')
 
             # no fresh cards
             elif len(self.fresh_cards) == 0:
                 random.shuffle(self.used_cards)
-                print('No new cards, shuffling returned, dealing from returned.')
+                self.messages.append('No new cards, shuffling returned, dealing from returned.')
                 return self.used_cards.pop()
 
         return self.fresh_cards.pop()
@@ -431,6 +432,7 @@ class Table():
         # dealer bust
         if dealer_result > 21:
             self.dealer_bjck = 'Bust!'
+            self.round_result_disp.append('Dealer busts!')
 
             for player in self.players:
 
@@ -554,13 +556,6 @@ class Table():
                     ))
                 print('{0:>60}'.format(self.players[0].message))
 
-            for message in self.messages:
-                print('{0:^60}'.format(message))
-            self.messages = []
-
-            for msg in self.round_result_disp:
-                print('{0:^60}'.format(msg))
-
         # multiplayer
         else:
 
@@ -609,12 +604,16 @@ class Table():
 
             print('')
 
-            for message in self.messages:
-                print('{0:^60}'.format(message))
-            self.messages = []
+        # move deck messages to table messages
+        self.messages.extend(self.deck.messages)
+        self.deck.messages = []
 
-            for msg in self.round_result_disp:
-                print('{0:^60}'.format(msg))
+        for message in self.messages:
+            print('{0:^60}'.format(message))
+        self.messages = []
+
+        for msg in self.round_result_disp:
+            print('{0:^60}'.format(msg))
 
 
 class Menu():
@@ -643,10 +642,12 @@ class Menu():
         print(*self.logo, sep='\n')
         print('{0:^60}'.format('Menu:'))
         print('{0:^60}'.format('1 - Play Blackjack'))
-        print('{0:^60}'.format('3 - About'))
-        print('{0:^60}'.format('4 - Quit'))
+        print('{0:^60}'.format('2 - About'))
+        print('{0:^60}'.format('3 - Quit'))
 
         while True:
+
+            inp = None
             try:
                 inp = int(input())
             except ValueError:
