@@ -114,7 +114,32 @@ class Decks():
             self.used_cards.extend(cards)
         elif isinstance(cards, Card):
             self.used_cards.append(cards)
+        elif isinstance(cards, Hand):
+            self.used_cards.append(cards)
 
+
+class Hand(list):
+    """
+    blackjack hand of cards
+    """
+
+    def __int__(self):
+        """
+        return blackjack hand value. Determine Ace to be 1 or 11.
+        """
+        hand_value = 0
+        for card in self:
+            if card.value != 0:
+                hand_value += card.value
+        for card in self:
+            if card.value == 0 and hand_value > 10:
+                hand_value += 1
+            elif card.value == 0 and hand_value <= 10:
+                hand_value += 11
+        return hand_value
+
+    def __str__(self):
+        return ' '.join([str(card) for card in self])
 
 class Player():
     """
@@ -124,8 +149,11 @@ class Player():
     def __init__(self, name, account):
         self.name = name
         self.account = account
+
+        self.is_in = True
+        self.game_on = True
         self.bet_ammount = 0
-        self.hand = []
+        self.hand = Hand()
         self.decision_result = None
 
         self.bjck = ''
@@ -172,7 +200,7 @@ class Player():
             value = 0
             while True:
                 try:
-                    value = input(f'Type your bet value (bank: {self.account}$): ')
+                    value = input(f'{self.name} type your bet value (bank: {self.account}$): ')
                     if value == 'Q':
                         return False
                     value = int(value)
@@ -197,7 +225,7 @@ class Player():
         """
         self.account += ammount
 
-    def decision(self,):
+    def decision(self):
         """
         hand - [] of cards in hand
         return 'h' (hit) / 's' (stand) / 'd' (double-down) False on user quit
@@ -205,7 +233,7 @@ class Player():
 
         self.decision_result = None
         options = ['h', 's']
-        prompt = 'Type [h]it / [s]tand'
+        prompt = f'{self.name}, type [h]it / [s]tand'
         decision = ' '
 
         # possible double down?
@@ -221,47 +249,50 @@ class Player():
             elif decision == 'Q':
                 return False
 
+    def hand_value(self):
+        if int(self.hand) > 21:
+            self.bjck = 'Bust!'
+        elif int(self.hand) == 21 and len(self.hand) == 2:
+            self.bjck = 'Blackjack!'
+        else:
+            self.bjck = ''
+        return int(self.hand)
+
 
 class Table():
     """
     main table. hold players, cards and display
     """
 
-    def __init__(self, decks_num, start_credit=1000):
-        """decks_num - number of decks"""
+    def __init__(self, players_num=1, decks_num=1, start_credit=1000):
+        """
+        decks_num - number of decks, players_num - number of players,
+        start_credit - player's start credit
+        """
+
         self.deck = Decks(decks_num)
-        self.player1 = Player('Player1', start_credit)
         self.round_counter = 1
 
+        # players
+        self.players = []
+        for num in range(players_num):
+            self.players.append(Player(f'Player {num}', start_credit))
+
         # dealer
-        self.dealers_cards = []
+        self.dealers_cards = Hand()
         self.dealer_bjck = ''
 
         # display
-        self.round_result_disp = ''
+        self.round_result_disp = []
         self.messages = []
-
-    def hand_value(self, cards):
-        """
-        return blackjack hand value. Determine Ace to be 1 or 11.
-        Return cards value
-        """
-        hand_value = 0
-        for card in cards:
-            if card.value != 0:
-                hand_value += card.value
-        for card in cards:
-            if card.value == 0 and hand_value > 10:
-                hand_value += 1
-            elif card.value == 0 and hand_value <= 10:
-                hand_value += 11
-        return hand_value
 
     def new_game(self):
         """initial deal"""
+
         for _ in [0, 1]:
             self.dealers_cards.append(self.deck.deal())
-            self.player1.hit(self.deck)
+            for player in self.players: 
+                player.hit(self.deck)
 
     def dealers_move(self):
         """
@@ -270,11 +301,10 @@ class Table():
 
         while True:
 
-            hand = self.hand_value(self.dealers_cards)
-            if hand >= 17:
+            if int(self.dealers_cards) >= 17:
                 break
 
-            elif hand < 17:
+            elif int(self.dealers_cards) < 17:
                 # dealer takes card
                 self.dealers_cards.append(self.deck.deal())
 
@@ -282,34 +312,74 @@ class Table():
         """
         check if blackjack (after first deal).
         return True if blackjack, False if not
+        adjust player's credit, set player bet = 0
         """
-        player_result = self.hand_value(self.player1.hand)
-        dealer_result = self.hand_value(self.dealers_cards)
+        players_result = [player.hand_value() for player in self.players]
+        dealer_result = int(self.dealers_cards)
 
         # Tie blackjack
-        if player_result == dealer_result == 21:
-            self.dealer_bjck = 'Blackjack!'
-            self.player1.bjck = 'Blackjack!'
-            self.round_result_disp = 'Tie!'
+        if 21 in players_result and dealer_result == 21:
 
-            # return bet to player's credit
-            self.player1.win(self.player1.bet_ammount)
+            for player in self.players:
+
+                # player has blackjack
+                if player.hand_value() == 21:
+
+                    # return bet to player's credit
+                    player.win(player.bet_ammount)
+                    self.round_result_disp.append(
+                        f'{player.name}: Blackjack Tie! Bet ({player.bet_ammount}$) is being returned'
+                        )
+
+                # player lost
+                else:
+                    self.round_result_disp.append(
+                        f'{player.name} lost! (lost bet: {player.bet_ammount}$)'
+                        )
+
+                player.bet.ammount = 0
+
+            self.dealer_bjck = 'Blackjack!'
             return True
 
         # Player blackjack
-        elif dealer_result != player_result == 21:
-            self.player1.bjck = 'Blackjack!'
-            self.round_result_disp = f'Player wins! (Bank +{int(self.player1.bet_ammount*3/2)}$)'
-            
-            # return bet + price to player
-            price = int(self.player1.bet_ammount * 5 / 2)
-            self.player1.win(price)
+        elif 21 in players_result and dealer_result != 21:
+
+            for player in self.players:
+
+                # player's blackjack
+                if player.hand_value() == 21:
+                    self.round_result_disp.append(
+                        f'{player.name} wins! (Bank +{int(player.bet_ammount*3/2)}$)'
+                        )
+                    
+                    # return bet + price to player
+                    price = int(player.bet_ammount * 5 / 2)
+                    player.win(price)
+
+                # player's loss
+                else:
+                    self.round_result_disp.append(
+                        f'{player.name} lost! (lost bet: {player.bet_ammount}$)'
+                        )
+
+                player.bet_ammount = 0
             return True
 
         # dealer blackjack
-        elif player_result != dealer_result == 21:
+        elif 21 not in players_result and dealer_result == 21:
             self.dealer_bjck = 'Blackjack!'
-            self.round_result_disp = f'Player lost! (lost bet: {self.player1.bet_ammount}$)'
+            self.round_result_disp.append(
+                    f'Dealer Blackjack!'
+                )
+
+            # player's loss
+            for player in self.players:
+                self.round_result_disp.append(
+                    f'{player.name} lost! (lost bet: {player.bet_ammount}$)'
+                )
+                player.bet_ammount = 0
+
             return True
 
         # no blackjack
@@ -319,53 +389,76 @@ class Table():
         """
         determine round results
         """
-        player_result = self.hand_value(self.player1.hand)
-        dealer_result = self.hand_value(self.dealers_cards)
+        players_result = [player.hand_value() for player in self.players]
+        dealer_result = int(self.dealers_cards)
 
+        # dealer bust
         if dealer_result > 21:
             self.dealer_bjck = 'Bust!'
 
-        # player over 21
-        if player_result > 21:
-            self.round_result_disp = f'Player lost! (lost bet: {self.player1.bet_ammount}$)'
-            self.player1.bjck = 'Bust!'
+            for player in self.players:
 
-        # dealer over 21
-        elif dealer_result > 21:
-            self.round_result_disp = f'Player wins! (Bank +{self.player1.bet_ammount}$)'
-            price = self.player1.bet_ammount * 2
-            self.player1.win(price)
+                # player wins
+                if player.hand_value() <= 21:
+                    self.round_result_disp.append(
+                        f'{player.name} wins! (Bank +{player.bet_ammount}$)'
+                        )
+                    player.win(player.bet_ammount*2)
 
-        # both 21 or less
+                # player bust
+                else:
+                    self.round_result_disp.append(
+                        f'{player.name} busts! (lost bet: {player.bet_ammount}$)'
+                        )
+                player.bet_ammount = 0
+
+        # dealer <= 21
         else:
+            for player in self.players:
 
-            # tie
-            if player_result == dealer_result:
-                self.round_result_disp = 'Tie!'
-                self.player1.win(self.player1.bet_ammount)
+                # player bust
+                if player.hand_value() > 21:
+                    self.round_result_disp.append(
+                        f'{player.name} busts! (lost bet: {player.bet_ammount}$)'
+                        )
 
-            # player > dealer
-            elif player_result > dealer_result:
-                self.round_result_disp = f'Player wins! (Bank +{self.player1.bet_ammount}$)'
-                price = self.player1.bet_ammount * 2
-                self.player1.win(price)
+                else:
 
-            # player < dealer
-            else:
-                self.round_result_disp = f'Player lost! (lost bet: {self.player1.bet_ammount}$)'
-        self.player1.bet_ammount = 0
+                    # tie
+                    if player.hand_value() == dealer_result:
+                        self.round_result_disp.append(
+                            f'{player.name} Ties! Bet ({player.bet_ammount}$) is being returned'
+                            )
+                        player.win(player.bet_ammount)
+
+                    # win
+                    elif player.hand_value() > dealer_result:
+                        self.round_result_disp.append(
+                            f'{player.name} wins! (Bank +{player.bet_ammount}$)'
+                            )
+                        player.win(player.bet_ammount*2)
+                    # lost
+                    else:
+                        self.round_result_disp.append(
+                            f'{player.name} lost! (lost bet: {player.bet_ammount}$)'
+                            )
+                player.bet_ammount = 0
 
     def end_round(self):
-        """return cards to deck"""
+        """return cards to deck, reset round vars"""
         self.deck.return_cards(self.dealers_cards)
-        self.dealers_cards = []
-        self.deck.return_cards(self.player1.hand)
-        self.player1.hand = []
+        self.dealers_cards = Hand()
 
-        self.player1.bet_ammount = 0
+        # reset player rounds
+        for player in self.players:
+            self.deck.return_cards(player.hand)
+            player.hand = Hand()
+            player.bet_ammount = 0
+            player.bjck = ''
+            player.game_on = True
+
         self.dealer_bjck = ''
-        self.player1.bjck = ''
-        self.round_result_disp = ''
+        self.round_result_disp = []
         self.round_counter += 1
 
         decision = input('Press [ENTER] to continnue, press [q] to quit game...')
@@ -377,55 +470,110 @@ class Table():
         display game. show_all - if False show only first dealer's card
         """
 
-        self.player1.hand.sort()
-        self.dealers_cards.sort()
+        # one player
+        if len(self.players) == 1:
+            self.players[0].hand.sort()
+            self.dealers_cards.sort()
 
-        p_cards_li = []
-        for card in self.player1.hand:
-            p_cards_li.append(str(card))
-
-        d_cards_li = []
-        for card in self.dealers_cards:
-            d_cards_li.append(str(card))
-
-        clr_scr()
-        print('{0:^60}'.format(f'Round: {self.round_counter}'))
-        print('{0:<30}{1:>30}'.format(
-               "Dealer:",
-               "Player:"
-               ))
-        print("{0:>60}".format(f"bank: {self.player1.account}$"))
-        print("{0:>60}".format(f"bet: {self.player1.bet_ammount}$"))
-        print('')
-
-        # show all
-        if show_all is True:
-            # cards
-            print('{0:<30}{1:>30}'.format(' '.join(d_cards_li),
-                                          ' '.join(p_cards_li)))
-            # hand values
+            clr_scr()
+            print('{0:^60}'.format(f'Round: {self.round_counter}'))
             print('{0:<30}{1:>30}'.format(
-                    f'({self.hand_value(self.dealers_cards)})',
-                    f'({self.hand_value(self.player1.hand)})'
+                "Dealer:",
+                f"{self.players[0].name}:"
+                ))
+            print("{0:>60}".format(f"bank: {self.players[0].account}$"))
+            print("{0:>60}".format(f"bet: {self.players[0].bet_ammount}$"))
+            print('')
+
+            # show all
+            if show_all is True:
+                # cards
+                print('{0:<30}{1:>30}'.format(str(self.dealers_cards),
+                                              str(self.players[0].hand)))
+                # hand values
+                print('{0:<30}{1:>30}'.format(
+                        f'({int(self.dealers_cards)})',
+                        f'({self.players[0].hand_value()})'
+                        ))
+                # blackjack / bust
+                print('{0:<30}{1:>30}'.format(self.dealer_bjck, self.players[0].bjck))
+
+            # hide dealer's cards
+            else:
+                print('{0:<30}{1:>30}'.format(f'{str(self.dealers_cards[0])} []',
+                                              str(self.players[0].hand)))
+                print('{0:<30}{1:>30}'.format(
+                    '(?)',
+                    f'({self.players[0].hand_value()})'
                     ))
-            # blackjack / bust
-            print('{0:<30}{1:>30}'.format(self.dealer_bjck, self.player1.bjck))
+                print('{0:>60}'.format(self.players[0].bjck))
 
-        # hide dealer's cards
-        else:
-            print('{0:<30}{1:>30}'.format(f'{str(self.dealers_cards[0])} []',
-                                          ' '.join(p_cards_li)))
-            print('{0:<30}{1:>30}'.format(
-                  '(?)',
-                  f'({self.hand_value(self.player1.hand)})'
-                  ))
-            print('{0:>60}'.format(self.player1.bjck))
+            for message in self.messages:
+                print('{0:^60}'.format(message))
+            self.messages = []
 
-        for message in self.messages:
-            print('{0:^60}'.format(message))
-        self.messages = []
+            for msg in self.round_result_disp:
+                print('{0:^60}'.format(msg))
 
-        print('{0:^60}'.format(self.round_result_disp))
+        # two players
+        elif len(self.players) == 2:
+
+            # sort hands 
+            for player in self.players:
+                player.hand.sort()
+            self.dealers_cards.sort()
+
+            clr_scr()
+
+            # dealer
+            print('{0:^60}'.format(f'Round: {self.round_counter}'))
+            print('{0:^60}'.format("Dealer:"))
+
+            # dealer show all
+            if show_all is True:
+                # cards
+                print('{0:^60}'.format(str(self.dealers_cards)))
+                # hand values
+                print('{0:^60}\n'.format(
+                    f'({str(int(self.dealers_cards))}){self.dealer_bjck}'
+                    ))
+
+            # hide dealer's cards
+            else:
+                print('{0:^60}'.format(f'{str(self.dealers_cards[0])} []'))
+                print('{0:^60}\n'.format('(?)'))
+
+            # players
+            print('{0:<20}{1:<20}'.format(
+                f"{self.players[0].name}:",
+                f"{self.players[1].name}:",
+                ))
+            print("{0:<20}{1:<20}".format(
+                f"bank: {self.players[0].account}$",
+                f"bank: {self.players[1].account}$"
+                ))
+            print("{0:<20}{1:<20}".format(
+                f"bet: {self.players[0].bet_ammount}$",
+                f"bet: {self.players[1].bet_ammount}$"
+                ))
+            print("{0:<20}{1:<20}".format(
+                str(self.players[0].hand),
+                str(self.players[1].hand)
+                ))
+            print("{0:<20}{1:<20}".format(
+                f"({self.players[0].hand_value()})",
+                f"({self.players[1].hand_value()})"
+                ))
+            print("{0:<20}{1:<20}".format(self.players[0].bjck, 
+                                          self.players[1].bjck
+                                          ))
+
+            for message in self.messages:
+                print('{0:^60}'.format(message))
+            self.messages = []
+
+            for msg in self.round_result_disp:
+                print('{0:^60}'.format(msg))
 
 
 class Menu():
@@ -453,16 +601,17 @@ class Menu():
         clr_scr()
         print(*self.logo, sep='\n')
         print('{0:^60}'.format('Menu:'))
-        print('{0:^60}'.format('1 - new game'))
-        print('{0:^60}'.format('2 - about'))
-        print('{0:^60}'.format('3 - quit'))
+        print('{0:^60}'.format('1 - single player'))
+        print('{0:^60}'.format('2 - multi player'))
+        print('{0:^60}'.format('3 - about'))
+        print('{0:^60}'.format('4 - quit'))
 
         while True:
             try:
                 inp = int(input())
             except ValueError:
                 print('Incorrect value')
-            if inp in [1, 2, 3]:
+            if inp in [1, 2, 3, 4]:
                 self.state = inp
                 break
 
@@ -512,32 +661,39 @@ def main():
     """
 
     main_menu = Menu()
-    while main_menu.state != 3:
+    while main_menu.state != 4:
 
         # display menu
         if main_menu.state == 0:
             main_menu.display_menu()
 
         # display about
-        if main_menu.state == 2:
+        if main_menu.state == 3:
             main_menu.about()
 
         # new game
-        elif main_menu.state == 1:
+        elif main_menu.state in [1, 2]:
 
-            table = Table(1, 1000)
+            if main_menu.state == 1:
+                table = Table(1, 1, 1000)
+            else:
+                table = Table(2, 2, 1000)
 
             # game loop
             while True:
 
                 table.display(True)
+
+                # players bet
+                for player in table.players:
+                    if player.bet(50) is False:
+                        # main_menu.state = 0
+                        player.game_on = False
+                        player.is_in = False
+                        break
+                    table.display(True)
+
                 table.new_game()
-
-                # player bets
-                if table.player1.bet(50) is False:
-                    main_menu.state = 0
-                    break
-
                 table.display()
 
                 # check if blackjack
@@ -547,38 +703,45 @@ def main():
                     table.end_round()
                     continue
 
-                # player's decision
-                while True:
+                # players decisions
+                while any([player.game_on for player in table.players]):
 
-                    # player quits game
-                    if table.player1.decision() is False:
-                        main_menu.state = 0
-                        break
+                    for player in table.players:
+                        if player.game_on is True:
+                            # player quits game
+                            if player.decision() is False:
+                                # main_menu.state = 0
+                                player.game_on = False
+                                player.is_in = False
 
-                    # player hits - dealer's turn
-                    if table.player1.decision_result == 'h':
-                        table.player1.hit(table.deck)
-                        table.display()
+                            # player hits - dealer's turn
+                            if player.decision_result == 'h':
+                                player.hit(table.deck)
+                                table.display()
 
-                    # player stands
-                    elif table.player1.decision_result == 's':
-                        break
+                            # player stands
+                            elif player.decision_result == 's':
+                                player.game_on = False
 
-                    # player double down
-                    if table.player1.decision_result == 'd':
-                        table.messages.append('Double down!')
-                        table.player1.account -= table.player1.bet_ammount
-                        table.player1.bet_ammount *= 2
-                        table.player1.hit(table.deck)
-                        break
+                            # player double down
+                            if player.decision_result == 'd':
+                                table.messages.append('Double down!')
+                                player.account -= player.bet_ammount
+                                player.bet_ammount *= 2
+                                player.hit(table.deck)
+                                player.game_on = False
 
-                    # player bust or 21
-                    if table.hand_value(table.player1.hand) >= 21:
-                        break
+                            # player bust or 21
+                            if player.hand_value() >= 21:
+                                player.game_on = False
 
                 table.dealers_move()
                 table.round_result()
                 table.display(True)
+
+                if not all([player.is_in for player in table.players]):
+                    main_menu.state = 0
+                    break
 
                 # [q] for quit
                 if table.end_round() is False:
