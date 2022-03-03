@@ -520,8 +520,6 @@ class Table():
 
         # one player
         if len(self.players) == 1:
-            self.players[0].hand.sort()
-            self.dealers_cards.sort()
 
             clr_scr()
             print('{0:^60}'.format(f'Round: {self.round_counter}'))
@@ -558,11 +556,6 @@ class Table():
 
         # multiplayer
         else:
-
-            # sort hands
-            for player in self.players:
-                player.hand.sort()
-            self.dealers_cards.sort()
 
             clr_scr()
 
