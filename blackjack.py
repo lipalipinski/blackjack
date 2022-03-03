@@ -52,6 +52,7 @@ class Card():
     def __hash__(self):
         return hash((self.suit, self.rank))
 
+
 class Decks():
     '''
     given number of 52 cards decks (shuffled)
@@ -142,6 +143,7 @@ class Hand(list):
         return hand_value
 
     def __str__(self):
+        self.sort()
         return ' '.join([str(card) for card in self])
 
 
@@ -759,11 +761,12 @@ def main():
 
                             # player double down
                             if player.decision_result == 'd':
-                                table.messages.append('Double down!')
+                                table.messages.append(f'{player.name} Double down!')
                                 player.account -= player.bet_ammount
                                 player.bet_ammount *= 2
                                 player.hit(table.deck)
                                 player.game_on = False
+                                table.display()
 
                             # player bust or 21
                             if player.hand_value() >= 21:

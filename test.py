@@ -6,6 +6,7 @@ import unittest
 import blackjack
 
 
+# Card()
 class TestCardInit(unittest.TestCase):
     '''blackjack.Card class initialisation'''
 
@@ -72,6 +73,7 @@ class TestCardSorting(unittest.TestCase):
         lista.sort()
         self.assertEqual(lista, [card_2, card_1])
 
+
 class TestCardHash(unittest.TestCase):
     """blackjack.Card class hash"""
 
@@ -84,9 +86,11 @@ class TestCardHash(unittest.TestCase):
         test_set.add(card_2)
         self.assertEqual(len(test_set), 2)
 
+
+# Hand()
 class TestHand(unittest.TestCase):
     '''
-    test class Hand
+    blackjack.Hand
     '''
 
     # .hand_value
@@ -134,11 +138,19 @@ class TestHand(unittest.TestCase):
         test_hand.extend([blackjack.Card('H', '6'), blackjack.Card('H', 'A')])
         self.assertEqual(int(test_hand), 17)
 
+    def test__str__(self):
+        """hand string"""
+        test_hand = blackjack.Hand()
+        test_hand.extend([blackjack.Card('H', '6'), blackjack.Card('H', 'A')])
+        self.assertEqual(str(test_hand), str(blackjack.Card('H', 'A'))
+                         + ' ' + str(blackjack.Card('H', '6')))
 
-class TestDecks(unittest.TestCase):
-    '''tests for blackjack.Deck class'''
 
-    def test_def_cards_quantity(self):
+# Decks()
+class TestDecksInit(unittest.TestCase):
+    '''blackjack.Deck.__init__'''
+
+    def test_cards_quantity_1(self):
         '''are there 52 unique cards in deck'''
         test_deck = blackjack.Decks()
         uniq_set = set()
@@ -146,18 +158,22 @@ class TestDecks(unittest.TestCase):
             uniq_set.add(card)
         self.assertEqual(len(uniq_set), 52)
 
-    def test_cards_quantity(self):
+    def test_cards_quantity_2(self):
         '''creating multiple decks'''
         test_deck = blackjack.Decks(2)
         self.assertEqual(len(test_deck.fresh_cards), 2*52)
 
-    def test_def_cards_quantity_2(self):
+    def test_def_cards_quantity_3(self):
         '''are there 52 unique cards in 2 decks'''
         test_deck = blackjack.Decks(2)
         uniq_set = set()
         for card in test_deck.fresh_cards:
             uniq_set.add(card)
         self.assertEqual(len(uniq_set), 52)
+
+
+class TestDecksShuffle(unittest.TestCase):
+    '''blackjack.Deck.shuffle'''
 
     def test_shuffle(self):
         '''is shuffle shuffling a deck'''
@@ -166,6 +182,10 @@ class TestDecks(unittest.TestCase):
         not_shuffled = list(test_deck.fresh_cards)
         test_deck.shuffle()
         self.assertNotEqual(not_shuffled, test_deck.fresh_cards)
+
+
+class TestDecksReturn(unittest.TestCase):
+    '''blackjack.Deck.return'''
 
     def test_return_cards_list(self):
         """return list of cards"""
@@ -181,6 +201,10 @@ class TestDecks(unittest.TestCase):
         test_deck = blackjack.Decks()
         test_deck.return_cards(karta)
         self.assertEqual(test_deck.used_cards[0], karta)
+
+
+class TestDecksDeal(unittest.TestCase):
+    '''blackjack.Deck.deal'''
 
     def test_deal_all_cards(self):
         """deal all cards to table (no returns)"""
@@ -210,6 +234,7 @@ class TestDecks(unittest.TestCase):
             self.assertTrue(isinstance(karta, blackjack.Card))
 
 
+# Player()
 class TestPlayer(unittest.TestCase):
     """blackjack.Player class"""
 
