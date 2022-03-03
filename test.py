@@ -6,8 +6,8 @@ import unittest
 import blackjack
 
 
-class TestCard(unittest.TestCase):
-    '''tests for blackjack.Card class'''
+class TestCardInit(unittest.TestCase):
+    '''blackjack.Card class initialisation'''
 
     def test_card_value(self):
         '''getting value from dict'''
@@ -17,6 +17,9 @@ class TestCard(unittest.TestCase):
             result = test_card.value
             self.assertEqual(result, value)
 
+
+class TestCardSorting(unittest.TestCase):
+    """blackjack.Card class sorting and comparisions"""
     def test_string(self):
         '''casting class as a string'''
 
@@ -69,19 +72,92 @@ class TestCard(unittest.TestCase):
         lista.sort()
         self.assertEqual(lista, [card_2, card_1])
 
+class TestCardHash(unittest.TestCase):
+    """blackjack.Card class hash"""
+
+    def test__hash__(self):
+        """Card.__hash__()"""
+        card_1 = blackjack.Card('H', 'A')
+        card_2 = blackjack.Card('H', 'K')
+        test_set = set()
+        test_set.add(card_1)
+        test_set.add(card_2)
+        self.assertEqual(len(test_set), 2)
+
+class TestHand(unittest.TestCase):
+    '''
+    test class Hand
+    '''
+
+    # .hand_value
+    def test_hand_value_no_aces_1(self):
+        """under 21"""
+        test_hand = blackjack.Hand()
+        test_hand.extend([blackjack.Card('H', '2'), blackjack.Card('H', 'J')])
+        self.assertEqual(int(test_hand), 12)
+
+    def test_hand_value_with_aces_1(self):
+        """under 21"""
+        test_hand = blackjack.Hand()
+        test_hand.extend([blackjack.Card('H', '2'), blackjack.Card('H', 'A')])
+        self.assertEqual(int(test_hand), 13)
+
+    def test_hand_value_with_aces_2(self):
+        """16 + ace"""
+        test_hand = blackjack.Hand()
+        test_hand.extend([blackjack.Card('H', 'A'), blackjack.Card('H', '6'),
+                    blackjack.Card('H', 'K')])
+        self.assertEqual(int(test_hand), 17)
+
+    def test_hand_value_with_aces_3(self):
+        """10 + ace == 21"""
+        test_hand = blackjack.Hand()
+        test_hand.extend([blackjack.Card('H', '10'), blackjack.Card('H', 'A')])
+        self.assertEqual(int(test_hand), 21)
+
+    def test_hand_value_with_aces_4(self):
+        """two aces"""
+        test_hand = blackjack.Hand()
+        test_hand.extend([blackjack.Card('H', 'A'), blackjack.Card('H', 'A')])
+        self.assertEqual(int(test_hand), 12)
+
+    def test_hand_value_with_aces_5(self):
+        """four aces"""
+        test_hand = blackjack.Hand()
+        test_hand.extend([blackjack.Card('H', 'A'), blackjack.Card('H', 'A'),
+                          blackjack.Card('H', 'A'), blackjack.Card('H', 'A')])
+        self.assertEqual(int(test_hand), 14)
+
+    def test_hand_value_with_aces_6(self):
+        """6 + ace"""
+        test_hand = blackjack.Hand()
+        test_hand.extend([blackjack.Card('H', '6'), blackjack.Card('H', 'A')])
+        self.assertEqual(int(test_hand), 17)
+
 
 class TestDecks(unittest.TestCase):
     '''tests for blackjack.Deck class'''
 
     def test_def_cards_quantity(self):
-        '''are there 52 cards in deck'''
+        '''are there 52 unique cards in deck'''
         test_deck = blackjack.Decks()
-        self.assertEqual(len(test_deck.fresh_cards), 52)
+        uniq_set = set()
+        for card in test_deck.fresh_cards:
+            uniq_set.add(card)
+        self.assertEqual(len(uniq_set), 52)
 
     def test_cards_quantity(self):
-        '''are there 52 cards in deck'''
+        '''creating multiple decks'''
         test_deck = blackjack.Decks(2)
         self.assertEqual(len(test_deck.fresh_cards), 2*52)
+
+    def test_def_cards_quantity_2(self):
+        '''are there 52 unique cards in 2 decks'''
+        test_deck = blackjack.Decks(2)
+        uniq_set = set()
+        for card in test_deck.fresh_cards:
+            uniq_set.add(card)
+        self.assertEqual(len(uniq_set), 52)
 
     def test_shuffle(self):
         '''is shuffle shuffling a deck'''
@@ -134,97 +210,31 @@ class TestDecks(unittest.TestCase):
             self.assertTrue(isinstance(karta, blackjack.Card))
 
 
-class TestTable(unittest.TestCase):
-    """test blackjack.Table class"""
-
-    # .new_game
-    def test_new_game(self):
-        """take cards from deck"""
-        test_table = blackjack.Table(1)
-        test_table.new_game()
-        self.assertEqual(len(test_table.deck.fresh_cards), 48)
-
-    def test_new_game_2(self):
-        """cards on the table"""
-        test_table = blackjack.Table(1)
-        test_table.new_game()
-        self.assertEqual(len(test_table.player1.hand), 2)
-        self.assertEqual(len(test_table.dealers_cards), 2)
-
-    # .end_round
-    '''
-    def test_end_round(self):
-        """return cards to deck"""
-        test_table = blackjack.Table(1)
-        test_table.new_game()
-        test_table.end_round()
-        self.assertEqual(len(test_table.deck.used_cards), 4)
-        '''
-
-    # .hand_value
-    def test_hand_value_no_aces_1(self):
-        """under 21"""
-        test_table = blackjack.Table(1)
-        card_set = [blackjack.Card('H', '2'), blackjack.Card('H', 'J')]
-        self.assertEqual(test_table.hand_value(card_set), 12)
-
-    def test_hand_value_with_aces_1(self):
-        """under 21"""
-        test_table = blackjack.Table(1)
-        card_set = [blackjack.Card('H', '2'), blackjack.Card('H', 'A')]
-        self.assertEqual(test_table.hand_value(card_set), 13)
-
-    def test_hand_value_with_aces_2(self):
-        """16 + ace"""
-        test_table = blackjack.Table(1)
-        card_set = [blackjack.Card('H', 'A'), blackjack.Card('H', '6'),
-                    blackjack.Card('H', 'K')]
-        self.assertEqual(test_table.hand_value(card_set), 17)
-
-    def test_hand_value_with_aces_3(self):
-        """10 + ace == 21"""
-        test_table = blackjack.Table(1)
-        card_set = [blackjack.Card('H', '10'), blackjack.Card('H', 'A')]
-        self.assertEqual(test_table.hand_value(card_set), 21)
-
-    def test_hand_value_with_aces_4(self):
-        """two aces"""
-        test_table = blackjack.Table(1)
-        card_set = [blackjack.Card('H', 'A'), blackjack.Card('H', 'A')]
-        self.assertEqual(test_table.hand_value(card_set), 12)
-
-    def test_hand_value_with_aces_5(self):
-        """four aces"""
-        test_table = blackjack.Table(1)
-        card_set = [blackjack.Card('H', 'A'), blackjack.Card('H', 'A'),
-                    blackjack.Card('H', 'A'), blackjack.Card('H', 'A')]
-        self.assertEqual(test_table.hand_value(card_set), 14)
-
-    def test_hand_value_with_aces_6(self):
-        """6 + ace"""
-        test_table = blackjack.Table(1)
-        card_set = [blackjack.Card('H', '6'), blackjack.Card('H', 'A')]
-        self.assertEqual(test_table.hand_value(card_set), 17)
-
-    # dealers move
-
-    def test_dealers_move_2(self):
-        """dealer busts"""
-        test_table = blackjack.Table(1)
-        test_table.dealers_cards = [blackjack.Card('H', '8'),
-                                    blackjack.Card('H', '8'),
-                                    blackjack.Card('H', '6')]
-        self.assertFalse(test_table.dealers_move())
-
-
 class TestPlayer(unittest.TestCase):
     """blackjack.Player class"""
 
-    def test_win(self):
-        """adding to account"""
+    def test_win_1(self):
+        """returning bet"""
+        test_player = blackjack.Player('x', 1000)
+        test_player.bet_ammount = 50
+        test_player.win(1)
+        self.assertEqual(test_player.account, 1050)
+
+    def test_win_2(self):
+        """blackjack (5/2 bet)"""
+        test_player = blackjack.Player('x', 1000)
+        test_player.bet_ammount = 50
+        test_player.win(5/2)
+        self.assertEqual(test_player.account, 1125)
+
+    def test_win_3(self):
+        """game over test"""
         test_player = blackjack.Player('x', 0)
-        test_player.win(10)
-        self.assertEqual(test_player.account, 10)
+        test_player.bet_ammount = 50
+        test_player.win(0)
+        self.assertEqual(test_player.message, 'Game Over!')
+        self.assertFalse(test_player.game_on)
+        self.assertFalse(test_player.is_in)
 
     def test_hit(self):
         """player takes card"""

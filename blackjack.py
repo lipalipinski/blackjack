@@ -49,6 +49,8 @@ class Card():
     def __ge__(self, other):
         return self.value >= other
 
+    def __hash__(self):
+        return hash((self.suit, self.rank))
 
 class Decks():
     '''
