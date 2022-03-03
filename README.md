@@ -20,6 +20,8 @@ Inspired by a bootcamp assignment. Original requirements:
 
 I have created some tests using unittest module in **test.py**.
 
+* 3.03.2022:
+  * multiplayer added
 * 25.02.2022:
   * display messages
   * double down

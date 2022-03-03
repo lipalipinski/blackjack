@@ -276,7 +276,7 @@ class Player():
 
 class Table():
     """
-    main table. hold players, cards and display
+    main table. holds players, cards and display
     """
 
     def __init__(self, start_credit=1000):
@@ -362,7 +362,7 @@ class Table():
 
                         # return bet to player's credit
                         self.round_result_disp.append(
-                            f'{player.name}: Blackjack Tie! Bet ({player.bet_ammount}$) is being returned'
+                            f'{player.name}: Blackjack Tie! Bet ({player.bet_ammount}$) is being returned.'
                             )
                         player.win(1)
 
@@ -403,7 +403,7 @@ class Table():
         elif 21 not in players_result and dealer_result == 21:
             self.dealer_bjck = 'Blackjack!'
             self.round_result_disp.append(
-                    'Dealer Blackjack!'
+                    'Dealer: Blackjack!'
                 )
 
             # player's loss
@@ -471,7 +471,7 @@ class Table():
                         # tie
                         if player.hand_value() == dealer_result:
                             self.round_result_disp.append(
-                                f'{player.name} Ties! Bet ({player.bet_ammount}$) is being returned'
+                                f'{player.name} ties! Bet ({player.bet_ammount}$) is being returned.'
                                 )
                             player.win(1)
 
@@ -660,17 +660,17 @@ class Menu():
         '''game info'''
 
         abc = ['                                                        ',
-               'Player plays against dealer. Aim is to get as close to  ',
+               'Players plays against dealer. Aim is to get as close to ',
                '21 as possible, but not higher! Two = 2, Three = 3 etc..',
                'Face Cards = 10, Ace = 1 or 11, whichever gives better  ',
                'score.                                                  ',
                'Game run:                                               ',
-               '1 - player places a bet                                 ',
+               '1 - players places thair bets                           ',
                '2 - two cards for player (faces up) and for dealer (one ',
                '    up, one down)                                       ',
                '3 - players move: hit (take a card)/stand (pass)/double ',
                '    down (doble the bet and take exactly one card)      ',
-               '4 - dealer takes cards until he riches 17 or more       ',
+               '4 - dealer takes cards until he reaches 17 or more      ',
                '5 - turn result (bet is being returned on tie game)     ',
                '                                                        ',
                'Blackjack (two cards of 21 value) always wins, except   ',
@@ -678,7 +678,8 @@ class Menu():
                'The deck is being shuffled after reaching a cut card when',
                'there is no cards on the table. Cut card is placed      ',
                'randomly by a dealer (between 15th and 25th cardfrom the',
-               'bottom)                                                 ',
+               'bottom). Number od single decks in a game deck = number ',
+               'of players                                              ',         
                '                                                        ',
                'GOOD LUCK!                                              ']
 

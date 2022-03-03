@@ -235,8 +235,18 @@ class TestDecksDeal(unittest.TestCase):
 
 
 # Player()
-class TestPlayer(unittest.TestCase):
-    """blackjack.Player class"""
+class TestPlayerHit(unittest.TestCase):
+    """blackjack.Player.hit"""
+    def test_hit(self):
+        """player takes card"""
+        test_player = blackjack.Player('x', 1000)
+        test_deck = blackjack.Decks(1)
+        test_player.hit(test_deck)
+        self.assertIsInstance(test_player.hand[0], blackjack.Card)
+
+
+class TestPlayerWin(unittest.TestCase):
+    """blackjack.Player.win"""
 
     def test_win_1(self):
         """returning bet"""
@@ -261,13 +271,34 @@ class TestPlayer(unittest.TestCase):
         self.assertFalse(test_player.game_on)
         self.assertFalse(test_player.is_in)
 
-    def test_hit(self):
-        """player takes card"""
-        test_player = blackjack.Player('x', 1000)
-        test_deck = blackjack.Decks(1)
-        test_player.hit(test_deck)
-        self.assertIsInstance(test_player.hand[0], blackjack.Card)
 
+class TestPlayerHandValue(unittest.TestCase):
+    """blackjack.Player.hand_value"""
+
+    def test_hand_value_1(self):
+        """hand < 21"""
+        test_player = blackjack.Player('Testowy', 1000)
+        test_player.hand.extend([blackjack.Card('H', '2'),
+                                 blackjack.Card('H', 'J')])
+        self.assertEqual(test_player.hand_value(), 12)
+        self.assertEqual(test_player.message, '')
+
+    def test_hand_value_2(self):
+        """hand > 21"""
+        test_player = blackjack.Player('Testowy', 1000)
+        test_player.hand.extend([blackjack.Card('H', 'K'),
+                                 blackjack.Card('H', 'K'),
+                                 blackjack.Card('H', 'K')])
+        self.assertEqual(test_player.hand_value(), 30)
+        self.assertEqual(test_player.message, 'Bust!')
+
+    def test_hand_value_3(self):
+        """blackjack"""
+        test_player = blackjack.Player('Testowy', 1000)
+        test_player.hand.extend([blackjack.Card('H', 'K'),
+                                 blackjack.Card('H', 'A')])
+        self.assertEqual(test_player.hand_value(), 21)
+        self.assertEqual(test_player.message, 'Blackjack!')
 
 if __name__ == '__main__':
     unittest.main()
